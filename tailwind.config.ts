@@ -1,3 +1,5 @@
+import { addDynamicIconSelectors } from '@iconify/tailwind'
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -8,11 +10,20 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
+      backgroundColor: {
         background: "var(--background)",
-        foreground: "var(--foreground)",
+        primary: "var(--primary)",
+        accent: "var(--accent)",
+      },
+      textColor: {
+        primary: "var(--text-primary)",
+        primaryLight: "var(--text-primary--light)",
+        accent: "var(--accent)",
+      },
+      borderColor: {
+        primary: "var(--border-primary)",
       },
     },
   },
-  plugins: [],
+  plugins: [addDynamicIconSelectors()],
 } satisfies Config;
