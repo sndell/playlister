@@ -1,4 +1,5 @@
 import { PlaylistInput } from "@/components/PlaylistInput";
+import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
           <div className="text-center text-primary">or</div>
           <div className="flex-1 h-[1px] bg-primary" />
         </div>
+        <GoogleAuthButton />
       </main>
       <footer className="flex-1"></footer>
     </div>
