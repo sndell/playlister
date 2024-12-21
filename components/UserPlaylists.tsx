@@ -17,17 +17,17 @@ export const UserPlaylists = ({ playlists }: Props) => {
   };
 
   return (
-    <div className="flex flex-col max-w-2xl w-full mx-auto px-2 overflow-hidden">
-      <div className="flex items-center rounded-xl border border-primary bg-primary shadow-lg">
+    <div className="flex flex-col max-w-2xl w-full mx-auto overflow-hidden gap-2 px-3">
+      <div className="flex items-center border border-primary bg-primary rounded-xl">
+        <span className="icon-[solar--magnifer-outline] text-primaryLight ml-3" />
         <input
           type="text"
-          placeholder="Filter playlists"
-          className="flex-1 px-3 py-2 text-sm bg-transparent text-primaryLight focus:outline-none"
+          placeholder="Filter playlists..."
+          className="flex-1 py-2 text-sm px-3 bg-transparent text-primaryLight focus:outline-none"
           onChange={onChange}
         />
-        <span className="icon-[solar--magnifer-outline] text-primaryLight mr-3" />
       </div>
-      <div className="flex-1 overflow-y-auto scrollbar-slim">
+      <div className="flex-1 overflow-y-auto scrollbar-slim p-3 rounded-xl border border-primary bg-primary mb-2">
         <div className="flex flex-col gap-2">
           {filteredPlaylists.map((playlist) => (
             <div key={playlist.id} className="flex items-center gap-2">
