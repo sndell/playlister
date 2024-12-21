@@ -33,6 +33,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(process.env.APP_URL as string);
   } catch (error) {
     console.error("Error during token exchange:", error);
-    return NextResponse.json({ error: "Authentication failed" }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 }
