@@ -5,7 +5,7 @@ export async function GET() {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    `${process.env.NODE_ENV === 'production' ? 'https://' : ''}${process.env.APP_URL}/api/auth/callback`
+    `${process.env.APP_URL}/api/auth/callback`
   );
 
   const scopes = ['https://www.googleapis.com/auth/youtube.readonly'];
