@@ -2,7 +2,7 @@ export const PlaylistInput = () => (
   <label className="space-y-2 w-full">
     <div className="text-primary">Playlist URL or ID</div>
     <div className="flex gap-2">
-      <div className="flex flex-1 items-center pr-3 rounded-xl border border-primary bg-primary">
+      <div className="flex flex-1 items-center pr-3 rounded-xl border border-primary bg-primary shadow-lg">
         <input
           type="text"
           placeholder="Enter playlist URL or ID"
@@ -10,7 +10,7 @@ export const PlaylistInput = () => (
         />
         <span className="icon-[solar--magnifer-outline] text-primaryLight" />
       </div>
-      <button className="px-3 py-2 text-sm rounded-xl bg-accent text-primary">View</button>
+      <button className="px-3 py-2 text-sm rounded-xl bg-accent text-primary shadow-lg">View</button>
     </div>
   </label>
 );
