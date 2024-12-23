@@ -1,6 +1,7 @@
 "use client";
 
 import { youtube_v3 } from "googleapis";
+import Link from "next/link";
 import { useState } from "react";
 
 type Props = {
@@ -27,10 +28,14 @@ export const UserPlaylists = ({ playlists }: Props) => {
           onChange={onChange}
         />
       </div>
-      <div className="flex-1 overflow-y-auto scrollbar-slim p-3 rounded-xl border border-primary bg-primary mb-2">
-        <div className="flex flex-col gap-2">
+      <div className="flex-1 overflow-y-auto scrollbar-slim rounded-xl border border-primary bg-primary mb-2">
+        <div className="flex flex-col">
           {filteredPlaylists.map((playlist) => (
-            <div key={playlist.id} className="flex items-center gap-2">
+            <Link
+              href={`/${playlist.id}`}
+              key={playlist.id}
+              className="flex items-center gap-2 px-2 py-1 hover:bg-primaryDark cursor-pointer"
+            >
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -46,7 +51,7 @@ export const UserPlaylists = ({ playlists }: Props) => {
               <div className="text-primaryLight whitespace-nowrap">
                 {new Date(playlist.snippet?.publishedAt as string).toLocaleDateString("en-GB")}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

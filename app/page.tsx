@@ -1,25 +1,22 @@
 import { PlaylistInput } from "@/components/PlaylistInput";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import { cookies } from "next/headers";
-import { google } from "googleapis";
 import { UserPlaylists } from "@/components/UserPlaylists";
 import { cn } from "@/util/cn";
+import { youtube, oauth2Client } from "@/lib/google";
 
 export default async function Home() {
   const getPlaylists = async () => {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken")?.value;
+    const refreshToken = cookieStore.get("refreshToken")?.value;
 
-    if (accessToken) {
+    if (accessToken || refreshToken) {
       try {
-        const oauth2Client = new google.auth.OAuth2(
-          process.env.GOOGLE_CLIENT_ID,
-          process.env.GOOGLE_CLIENT_SECRET,
-          `${process.env.APP_URL}/api/auth/callback`
-        );
-
-        oauth2Client.setCredentials({ access_token: accessToken });
-        const youtube = google.youtube({ version: "v3", auth: oauth2Client });
+        oauth2Client.setCredentials({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
 
         const response = await youtube.playlists.list({
           part: ["snippet"],
@@ -27,12 +24,12 @@ export default async function Home() {
           maxResults: 50,
         });
 
-        const playlists = response.data.items;
-        return playlists;
+        return response.data.items;
       } catch (error) {
         console.error("Error fetching playlists:", error);
       }
     }
+    return null;
   };
 
   const playlists = await getPlaylists();
@@ -41,8 +38,8 @@ export default async function Home() {
     <div className="flex flex-col w-full h-dvh gap-2">
       <header className={cn("grid place-content-center", !playlists ? "flex-1" : "py-4")}>
         <div className="flex gap-2 justify-center items-center">
-          <span className="icon-[solar--music-note-3-bold] text-4xl text-accent" />
-          <h1 className="text-2xl text-primary">Playlist Viewer</h1>
+          <span className="icon-[solar--playlist-linear] text-4xl text-accent" />
+          <h1 className="text-2xl text-primary">Playlister</h1>
         </div>
         <p className="text-center text-primaryLight">View a playlist or login to view private playlists</p>
       </header>
