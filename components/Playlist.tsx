@@ -10,7 +10,7 @@ type Props = {
 };
 
 export const Playlist = ({ playlistItems, playlistData }: Props) => {
-  const observerTarget = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchPlaylistItems = useCallback(
     async ({ pageParam = "" }) => {
@@ -36,36 +36,35 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
   const flatItems = data?.pages.flatMap((page) => page.items ?? []);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 1 }
-    );
+    const handleScroll = () => {
+      if (!scrollContainerRef.current) return;
+      const { scrollTop, clientHeight } = scrollContainerRef.current;
+      const itemHeight = 60;
+      const remainingItems = (flatItems?.length ?? 0) - Math.floor((scrollTop + clientHeight) / itemHeight);
+      const loadThreshold = 10;
 
-    const currentTarget = observerTarget.current;
-    if (currentTarget) observer.observe(currentTarget);
-
-    return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
+      if (remainingItems <= loadThreshold && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
     };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+    const scrollContainer = scrollContainerRef.current;
+    scrollContainer?.addEventListener("scroll", handleScroll);
+
+    return () => scrollContainer?.removeEventListener("scroll", handleScroll);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, flatItems]);
 
   return (
     <div className="flex flex-col p-2 mx-auto max-w-2xl h-dvh">
       <PlaylistHeader playlistData={playlistData} />
-      <div className="flex overflow-y-scroll flex-col flex-1 gap-0 rounded-xl border scrollbar-slim bg-primary border-primary">
+      <div
+        ref={scrollContainerRef}
+        className="flex overflow-y-scroll flex-col flex-1 gap-0 rounded-xl border scrollbar-slim bg-primary border-primary"
+      >
         {flatItems?.map((item, index) => (
           <PlaylistItem key={item.id} item={item} index={index} />
         ))}
-        <div ref={observerTarget} className="h-10" />
-        {isFetchingNextPage && (
-          <div className="text-center">
-            <span className="icon-[svg-spinners--3-dots-fade] text-primaryLight text-2xl" />
-          </div>
-        )}
+        {isFetchingNextPage && <LoadingIndicator />}
       </div>
     </div>
   );
@@ -84,19 +83,10 @@ const PlaylistHeader = ({ playlistData }: { playlistData: youtube_v3.Schema$Play
 );
 
 const PlaylistItem = ({ item, index }: { item: youtube_v3.Schema$PlaylistItem; index: number }) => (
-  <div key={item.id} className="flex items-center p-2 rounded-lg hover:bg-primaryDark">
+  <div className="flex items-center p-2 rounded-lg hover:bg-primaryDark">
     <div className="flex flex-1 items-center min-w-0">
       <span className="mr-4 w-6 text-right text-primaryLight">{index + 1}</span>
-      {item.snippet?.thumbnails?.default?.url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={item.snippet.thumbnails.default.url}
-          alt="Thumbnail"
-          className="object-cover flex-shrink-0 mr-4 w-12 h-12 rounded-md"
-        />
-      ) : (
-        <div className="grid place-content-center mr-4 w-12 h-12 rounded-md bg-primaryDark text-primaryLight">?</div>
-      )}
+      <ThumbnailOrPlaceholder url={item.snippet?.thumbnails?.default?.url} />
       <div className="flex flex-col flex-1 min-w-0">
         <div className="truncate text-primary">{item.snippet?.title}</div>
         <div className="truncate text-primaryLight">
@@ -107,5 +97,18 @@ const PlaylistItem = ({ item, index }: { item: youtube_v3.Schema$PlaylistItem; i
     <div className="ml-4 text-primaryLight">
       {new Date(item.snippet?.publishedAt ?? "").toLocaleDateString("en-GB")}
     </div>
+  </div>
+);
+
+const ThumbnailOrPlaceholder = ({ url }: { url?: string }) =>
+  url ? (
+    <img src={url} alt="Thumbnail" className="object-cover flex-shrink-0 mr-4 w-12 h-12 rounded-md" />
+  ) : (
+    <div className="grid place-content-center mr-4 w-12 h-12 rounded-md bg-primaryDark text-primaryLight">?</div>
+  );
+
+const LoadingIndicator = () => (
+  <div className="text-center py-4">
+    <span className="icon-[svg-spinners--3-dots-fade] text-primaryLight text-2xl" />
   </div>
 );
