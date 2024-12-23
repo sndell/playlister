@@ -44,8 +44,14 @@ export const GoogleAuthButton = ({ isLoggedIn }: Props) => {
       disabled={loginMutation.isPending}
       className="flex gap-2 justify-center items-center py-2 w-full bg-white rounded-xl border text-secondary border-white/70"
     >
-      <span className="icon-[flat-color-icons--google] text-2xl" />
-      {loginMutation.isPending ? "Loading..." : "Continue with Google"}
+      {loginMutation.isPending ? (
+        <span className="icon-[svg-spinners--3-dots-fade] text-primaryLight text-2xl" />
+      ) : (
+        <>
+          <span className="icon-[flat-color-icons--google] text-2xl" />
+          <div>Continue with Google</div>
+        </>
+      )}
     </button>
   );
 };
