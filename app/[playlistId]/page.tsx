@@ -2,7 +2,7 @@ import { Playlist } from "@/components/Playlist";
 import { oauth2Client, youtube } from "@/lib/google";
 import { cookies } from "next/headers";
 
-export default async function Page({ params }: { params: { playlistId: string } }) {
+export default async function Page({ params }: { params: Promise<{ playlistId: string }> }) {
   const getPlaylistDetails = async (playlistId: string) => {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken")?.value;
@@ -42,7 +42,7 @@ export default async function Page({ params }: { params: { playlistId: string } 
     return null;
   };
 
-  const { playlistId } = params;
+  const { playlistId } = await params;
   const playlistData = await getPlaylistDetails(playlistId);
   if (!playlistData || !playlistData.items || !playlistData.details) return <div>Failed to fetch playlist data</div>;
 
