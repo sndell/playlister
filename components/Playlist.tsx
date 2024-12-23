@@ -100,8 +100,9 @@ const PlaylistItem = ({ item, index }: { item: youtube_v3.Schema$PlaylistItem; i
   </div>
 );
 
-const ThumbnailOrPlaceholder = ({ url }: { url?: string }) =>
+const ThumbnailOrPlaceholder = ({ url }: { url?: string | null }) =>
   url ? (
+    // eslint-disable-next-line @next/next/no-img-element
     <img src={url} alt="Thumbnail" className="object-cover flex-shrink-0 mr-4 w-12 h-12 rounded-md" />
   ) : (
     <div className="grid place-content-center mr-4 w-12 h-12 rounded-md bg-primaryDark text-primaryLight">?</div>
