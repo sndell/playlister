@@ -15,15 +15,25 @@ export async function GET(req: NextRequest) {
     oauth2Client.setCredentials(tokens);
 
     const cookieStore = await cookies();
-    cookieStore.set("accessToken", tokens.access_token as string, {
-      httpOnly: true,
-    });
 
-    if (tokens.refresh_token) {
-      cookieStore.set("refreshToken", tokens.refresh_token as string, {
+    // Set access token
+    if (tokens.access_token) {
+      cookieStore.set("accessToken", tokens.access_token, {
         httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
       });
     }
+
+    // Set refresh token if available
+    if (tokens.refresh_token) {
+      cookieStore.set("refreshToken", tokens.refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+    }
+
     return NextResponse.redirect(process.env.APP_URL as string);
   } catch (error) {
     console.error("Error during token exchange:", error);

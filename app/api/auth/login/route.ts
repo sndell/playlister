@@ -8,6 +8,7 @@ export async function GET() {
     access_type: "offline",
     scope: scopes,
     include_granted_scopes: true,
+    prompt: "consent",
   });
 
   return NextResponse.json({ url });

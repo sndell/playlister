@@ -4,11 +4,7 @@ import { youtube_v3 } from "googleapis";
 import Link from "next/link";
 import { useState } from "react";
 
-type Props = {
-  playlists: youtube_v3.Schema$Playlist[];
-};
-
-export const UserPlaylists = ({ playlists }: Props) => {
+export const UserPlaylists = ({ playlists }: { playlists: youtube_v3.Schema$Playlist[] }) => {
   const [filteredPlaylists, setFilteredPlaylists] = useState(playlists);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -7,12 +7,16 @@ export async function POST(req: NextRequest) {
 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
+  const refreshToken = cookieStore.get("refreshToken")?.value;
 
-  if (!accessToken) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  if (!accessToken && !refreshToken) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   if (!playlistId) return NextResponse.json({ error: "Playlist ID is required" }, { status: 400 });
 
   try {
-    oauth2Client.setCredentials({ access_token: accessToken });
+    oauth2Client.setCredentials({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
 
     const response = await youtube.playlistItems.list({
       part: ["snippet"],

@@ -5,17 +5,23 @@ import { oauth2Client } from "@/lib/google";
 export async function GET() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
+  const refreshToken = cookieStore.get("refreshToken")?.value;
 
-  if (accessToken) {
-    oauth2Client.setCredentials({ access_token: accessToken });
+  if (accessToken || refreshToken) {
+    oauth2Client.setCredentials({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
 
     try {
-      await oauth2Client.revokeToken(accessToken);
+      if (refreshToken) await oauth2Client.revokeToken(refreshToken);
+      else if (accessToken) await oauth2Client.revokeToken(accessToken);
     } catch (error) {
-      console.error("Error revoking token:", error);
+      console.error("Error revoking tokens:", error);
     }
   }
 
+  // Always clear local storage regardless of revocation success
   cookieStore.delete("accessToken");
   cookieStore.delete("refreshToken");
 
