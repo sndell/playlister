@@ -74,7 +74,7 @@ export default function PrivacyPolicy() {
             <h3 className="text-xl font-medium mb-3">No Permanent Data Storage</h3>
             <p className="mb-4">
               We do not permanently store your YouTube data, playlists, or personal information on our servers. All data
-              is fetched in real-time from YouTube's API when you use our service.
+              is fetched in real-time from YouTube&apos;s API when you use our service.
             </p>
 
             <h3 className="text-xl font-medium mb-3">Security Measures</h3>
