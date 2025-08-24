@@ -11,8 +11,8 @@ export default function PrivacyPolicy() {
             </p>
 
             <p className="text-base leading-relaxed">
-              This Privacy Policy describes how Playlister ("we," "our," or "us") collects, uses, and protects your
-              information when you use our YouTube playlist viewing service.
+              This Privacy Policy describes how Playlister (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;)
+              collects, uses, and protects your information when you use our YouTube playlist viewing service.
             </p>
           </section>
 
@@ -91,8 +91,8 @@ export default function PrivacyPolicy() {
 
             <h3 className="text-xl font-medium mb-3">Google/YouTube</h3>
             <p className="mb-4">
-              Our service integrates with Google's YouTube API. Your use of YouTube data through our service is also
-              governed by:
+              Our service integrates with Google&apos;s YouTube API. Your use of YouTube data through our service is
+              also governed by:
             </p>
             <ul className="list-disc pl-6 mb-4 space-y-1">
               <li>
@@ -115,7 +115,7 @@ export default function PrivacyPolicy() {
             <ul className="list-disc pl-6 mb-4 space-y-1">
               <li>
                 <strong>Revoke Access:</strong> You can revoke our access to your YouTube data at any time by clicking
-                "Revoke access" or through your Google Account settings
+                &quot;Revoke access&quot; or through your Google Account settings
               </li>
               <li>
                 <strong>Data Deletion:</strong> When you revoke access, all stored tokens are immediately deleted
@@ -160,8 +160,8 @@ export default function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold mb-4">Changes to This Policy</h2>
             <p className="mb-4">
               We may update this Privacy Policy from time to time. We will notify users of any material changes by
-              updating the "Last updated" date at the top of this policy. Your continued use of the service after any
-              changes constitutes acceptance of the updated policy.
+              updating the &quot;Last updated&quot; date at the top of this policy. Your continued use of the service
+              after any changes constitutes acceptance of the updated policy.
             </p>
           </section>
 
