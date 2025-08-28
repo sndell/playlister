@@ -8,6 +8,11 @@ export const VideoPlayer = ({ id }: { id?: string }) => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [canUpdateVolume, setCanUpdateVolume] = useState(false);
   const playStartTimeRef = useRef<number | null>(null);
+  const [videoId, setVideoId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    setVideoId(id);
+  }, [id]);
 
   const handlePlay = () => {
     setIsPlaying(true);
@@ -25,11 +30,14 @@ export const VideoPlayer = ({ id }: { id?: string }) => {
     playStartTimeRef.current = null;
   }, [id]);
 
-  if (!id) return null;
+  if (!videoId) return null;
 
   return (
     <div className="bg-primary border border-primary rounded-xl mt-3 p-3 relative">
-      <button className="absolute -top-3 -right-3  rounded-full grid place-items-center z-50 bg-primary">
+      <button
+        onClick={() => setVideoId(undefined)}
+        className="absolute -top-3 -right-3  rounded-full grid place-items-center z-50 bg-primary"
+      >
         <span className="icon-[solar--close-circle-bold] text-primaryLight text-3xl" />
       </button>
       <ReactPlayer
