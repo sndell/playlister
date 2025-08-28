@@ -22,7 +22,6 @@ export const metadata: Metadata = {
   creator: "Playlister",
   publisher: "Playlister",
   robots: "index, follow",
-  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({

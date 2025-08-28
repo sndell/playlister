@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { UserPlaylists } from "@/components/UserPlaylists";
 import { cn } from "@/util/cn";
 import { youtube, oauth2Client } from "@/lib/google";
+import Link from "next/link";
 
 export default async function Home() {
   const getPlaylists = async () => {
@@ -53,6 +54,23 @@ export default async function Home() {
         <GoogleAuthButton isLoggedIn={!!playlists} />
       </main>
       {playlists ? <UserPlaylists playlists={playlists} /> : <div className="flex-1" />}
+      <footer className="flex items-center justify-center gap-3 pb-3">
+        <Link
+          href="/privacy-policy"
+          replace={false}
+          className="text-primaryLight hover:text-primary transition-colors duration-200"
+        >
+          Privacy Policy
+        </Link>
+        <span className="text-primaryLight text-sm">•</span>
+        <a
+          href="https://github.com/sndell/playlister"
+          target="_blank"
+          className="text-primaryLight hover:text-primary transition-colors duration-200"
+        >
+          GitHub
+        </a>
+      </footer>
     </div>
   );
 }
