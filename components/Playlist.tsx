@@ -3,7 +3,8 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { youtube_v3 } from "googleapis";
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
+import { VideoPlayer } from "./VideoPlayer";
 
 type Props = {
   playlistItems: youtube_v3.Schema$PlaylistItemListResponse;
@@ -12,6 +13,9 @@ type Props = {
 
 export const Playlist = ({ playlistItems, playlistData }: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
+  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+
+  console.log(playlistItems);
 
   const fetchPlaylistItems = useCallback(
     async ({ pageParam = "" }) => {
@@ -57,7 +61,7 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
   }, [hasNextPage, fetchNextPage, itemCount, isFetchingNextPage, virtualizer.getVirtualItems()]);
 
   return (
-    <div className="flex flex-col p-2 mx-auto max-w-2xl h-dvh">
+    <div className="flex flex-col p-2 mx-auto max-w-xl h-dvh">
       <PlaylistHeader playlistData={playlistData} />
       <div
         ref={parentRef}
@@ -89,13 +93,14 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
                 {isLoaderRow ? (
                   <LoadingIndicator />
                 ) : item ? (
-                  <PlaylistItem item={item} index={virtualItem.index} />
+                  <PlaylistItem item={item} index={virtualItem.index} setSelectedVideoId={setSelectedVideoId} />
                 ) : null}
               </div>
             );
           })}
         </div>
       </div>
+      <VideoPlayer id={selectedVideoId ?? undefined} />
     </div>
   );
 };
@@ -114,8 +119,19 @@ const PlaylistHeader = ({ playlistData }: { playlistData: youtube_v3.Schema$Play
   </div>
 );
 
-const PlaylistItem = ({ item, index }: { item: youtube_v3.Schema$PlaylistItem; index: number }) => (
-  <div className="flex items-center p-2 pl-0 rounded-lg hover:bg-primaryDark">
+const PlaylistItem = ({
+  item,
+  index,
+  setSelectedVideoId,
+}: {
+  item: youtube_v3.Schema$PlaylistItem;
+  index: number;
+  setSelectedVideoId: (id: string) => void;
+}) => (
+  <div
+    className="flex items-center p-2 pl-0 rounded-lg hover:bg-primaryDark cursor-pointer"
+    onClick={() => setSelectedVideoId(item.snippet?.resourceId?.videoId ?? "")}
+  >
     <div className="flex flex-1 items-center min-w-0">
       <span className="w-10 text-center text-primaryLight text-sm">{index + 1}</span>
       <ThumbnailOrPlaceholder url={item.snippet?.thumbnails?.default?.url} />
