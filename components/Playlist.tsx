@@ -58,36 +58,19 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
     overscan: 5, // Number of items to render outside of visible area
   });
 
+  // Get virtual items
+  const virtualItems = virtualizer.getVirtualItems();
+  const [lastItem] = [...virtualItems].reverse();
+
   // Infinite scrolling logic
   useEffect(() => {
-    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
-
     if (!lastItem) return;
 
-    // Trigger fetch when we're near the end
-    if (lastItem.index >= itemCount - 5 && hasNextPage && !isFetchingNextPage) {
+    // Trigger fetch only when we're at the very end (last 2 items or less)
+    if (lastItem.index >= itemCount - 2 && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [hasNextPage, fetchNextPage, itemCount, isFetchingNextPage]);
-
-  // Additional effect to handle scroll-based detection
-  useEffect(() => {
-    const scrollElement = parentRef.current;
-    if (!scrollElement) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollElement;
-      const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
-
-      // Trigger fetch when 80% scrolled and conditions are met
-      if (scrollPercentage > 0.8 && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    };
-
-    scrollElement.addEventListener("scroll", handleScroll);
-    return () => scrollElement.removeEventListener("scroll", handleScroll);
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [lastItem?.index, itemCount, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="flex flex-col p-2 mx-auto max-w-xl h-dvh">
@@ -103,7 +86,7 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
             position: "relative",
           }}
         >
-          {virtualizer.getVirtualItems().map((virtualItem) => {
+          {virtualItems.map((virtualItem) => {
             const isLoaderRow = virtualItem.index === itemCount;
             const item = flatItems?.[virtualItem.index];
 
