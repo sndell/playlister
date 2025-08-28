@@ -85,7 +85,7 @@ const PlaylistHeader = ({ playlistData }: { playlistData: youtube_v3.Schema$Play
 const PlaylistItem = ({ item, index }: { item: youtube_v3.Schema$PlaylistItem; index: number }) => (
   <div className="flex items-center p-2 rounded-lg hover:bg-primaryDark">
     <div className="flex flex-1 items-center min-w-0">
-      <span className="mr-4 w-6 text-right text-primaryLight">{index + 1}</span>
+      <span className="mr-4 w-6 text-right text-primaryLight text-sm">{index + 1}</span>
       <ThumbnailOrPlaceholder url={item.snippet?.thumbnails?.default?.url} />
       <div className="flex flex-col flex-1 min-w-0">
         <div className="truncate text-primary">{item.snippet?.title}</div>
@@ -109,7 +109,7 @@ const ThumbnailOrPlaceholder = ({ url }: { url?: string | null }) =>
   );
 
 const LoadingIndicator = () => (
-  <div className="text-center py-4">
+  <div className="text-center">
     <span className="icon-[svg-spinners--3-dots-fade] text-primaryLight text-2xl" />
   </div>
 );
