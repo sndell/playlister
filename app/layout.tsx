@@ -4,6 +4,7 @@ import "../styles/global.css";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { CookieConsentProvider } from "@/providers/CookieConsentProvider";
 import { CookieConsentModal } from "@/components/CookieConsentModal";
+import { Analytics } from "@/components/Analytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,14 +34,15 @@ export default function RootLayout({
 }>) {
   return (
     <QueryProvider>
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <CookieConsentProvider>
+      <CookieConsentProvider>
+        <html lang="en">
+          <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
             <CookieConsentModal />
             {children}
-          </CookieConsentProvider>
-        </body>
-      </html>
+            <Analytics />
+          </body>
+        </html>
+      </CookieConsentProvider>
     </QueryProvider>
   );
 }
