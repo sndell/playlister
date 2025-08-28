@@ -15,8 +15,6 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
 
-  console.log(playlistItems);
-
   const fetchPlaylistItems = useCallback(
     async ({ pageParam = "" }) => {
       const response = await fetch("/api/get-playlist-items", {
@@ -62,8 +60,7 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
 
   // Infinite scrolling logic
   useEffect(() => {
-    const virtualItems = virtualizer.getVirtualItems();
-    const [lastItem] = [...virtualItems].reverse();
+    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
 
     if (!lastItem) return;
 
@@ -71,7 +68,26 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
     if (lastItem.index >= itemCount - 5 && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [hasNextPage, fetchNextPage, itemCount, isFetchingNextPage, virtualizer]);
+  }, [hasNextPage, fetchNextPage, itemCount, isFetchingNextPage]);
+
+  // Additional effect to handle scroll-based detection
+  useEffect(() => {
+    const scrollElement = parentRef.current;
+    if (!scrollElement) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+      const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+
+      // Trigger fetch when 80% scrolled and conditions are met
+      if (scrollPercentage > 0.8 && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    };
+
+    scrollElement.addEventListener("scroll", handleScroll);
+    return () => scrollElement.removeEventListener("scroll", handleScroll);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="flex flex-col p-2 mx-auto max-w-xl h-dvh">
