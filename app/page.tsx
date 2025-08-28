@@ -5,6 +5,7 @@ import { UserPlaylists } from "@/components/UserPlaylists";
 import { cn } from "@/util/cn";
 import { youtube, oauth2Client } from "@/lib/google";
 import Link from "next/link";
+import { ToggleContsentModalButton } from "@/components/ToggleContsentModalButton";
 
 export default async function Home() {
   const getPlaylists = async () => {
@@ -55,21 +56,19 @@ export default async function Home() {
       </main>
       {playlists ? <UserPlaylists playlists={playlists} /> : <div className="flex-1" />}
       <footer className="flex items-center justify-center gap-3 pb-3">
-        <Link
-          href="/privacy-policy"
-          replace={false}
-          className="text-primaryLight hover:text-primary transition-colors duration-200"
-        >
+        <Link href="/privacy-policy" replace={false} className="text-primaryLight hover:text-primary transition-colors">
           Privacy Policy
         </Link>
         <span className="text-primaryLight text-sm">•</span>
         <a
           href="https://github.com/sndell/playlister"
           target="_blank"
-          className="text-primaryLight hover:text-primary transition-colors duration-200"
+          className="text-primaryLight hover:text-primary transition-colors"
         >
           GitHub
         </a>
+        <span className="text-primaryLight text-sm">•</span>
+        <ToggleContsentModalButton />
       </footer>
     </div>
   );

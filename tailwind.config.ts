@@ -1,4 +1,4 @@
-import { addDynamicIconSelectors } from '@iconify/tailwind'
+import { addDynamicIconSelectors } from "@iconify/tailwind";
 
 import type { Config } from "tailwindcss";
 
@@ -23,6 +23,8 @@ export default {
       },
       borderColor: {
         primary: "var(--border-primary)",
+        primaryLight: "var(--border-primary-light)",
+        accent: "var(--border-accent)",
       },
     },
   },

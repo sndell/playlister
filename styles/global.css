@@ -7,10 +7,12 @@
   --primary: #222121;
   --primaryDark: #201e1e;
   --border-primary: #383838;
+  --border-primary-light: #757575;
   --text-primary: #ffffff;
   --text-primary--light: #737373;
   --text-secondary: #000000;
-  --accent: #E9204B;
+  --accent: #e9204b;
+  --border-accent: #772a2a;
 }
 
 /* @media (prefers-color-scheme: dark) {
