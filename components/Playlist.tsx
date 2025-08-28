@@ -1,6 +1,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { youtube_v3 } from "googleapis";
 import { useEffect, useRef, useCallback } from "react";
 
@@ -10,7 +11,7 @@ type Props = {
 };
 
 export const Playlist = ({ playlistItems, playlistData }: Props) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const fetchPlaylistItems = useCallback(
     async ({ pageParam = "" }) => {
@@ -34,37 +35,66 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
   });
 
   const flatItems = data?.pages.flatMap((page) => page.items ?? []);
+  const itemCount = flatItems?.length ?? 0;
 
+  const virtualizer = useVirtualizer({
+    count: itemCount + (isFetchingNextPage ? 1 : 0), // +1 for loading indicator
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 60, // Estimated height of each item
+    overscan: 5, // Number of items to render outside of visible area
+  });
+
+  // Infinite scrolling logic
   useEffect(() => {
-    const handleScroll = () => {
-      if (!scrollContainerRef.current) return;
-      const { scrollTop, clientHeight } = scrollContainerRef.current;
-      const itemHeight = 60;
-      const remainingItems = (flatItems?.length ?? 0) - Math.floor((scrollTop + clientHeight) / itemHeight);
-      const loadThreshold = 10;
+    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
 
-      if (remainingItems <= loadThreshold && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    };
+    if (!lastItem) return;
 
-    const scrollContainer = scrollContainerRef.current;
-    scrollContainer?.addEventListener("scroll", handleScroll);
-
-    return () => scrollContainer?.removeEventListener("scroll", handleScroll);
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, flatItems]);
+    // Trigger fetch when we're near the end
+    if (lastItem.index >= itemCount - 5 && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, fetchNextPage, itemCount, isFetchingNextPage, virtualizer.getVirtualItems()]);
 
   return (
     <div className="flex flex-col p-2 mx-auto max-w-2xl h-dvh">
       <PlaylistHeader playlistData={playlistData} />
       <div
-        ref={scrollContainerRef}
-        className="flex overflow-y-scroll flex-col flex-1 gap-0 rounded-xl border scrollbar-slim bg-primary border-primary"
+        ref={parentRef}
+        className="flex overflow-y-auto flex-col flex-1 rounded-xl border scrollbar-slim bg-primary border-primary"
       >
-        {flatItems?.map((item, index) => (
-          <PlaylistItem key={item.id} item={item} index={index} />
-        ))}
-        {isFetchingNextPage && <LoadingIndicator />}
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualItem) => {
+            const isLoaderRow = virtualItem.index === itemCount;
+            const item = flatItems?.[virtualItem.index];
+
+            return (
+              <div
+                key={virtualItem.key}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: `${virtualItem.size}px`,
+                  transform: `translateY(${virtualItem.start}px)`,
+                }}
+              >
+                {isLoaderRow ? (
+                  <LoadingIndicator />
+                ) : item ? (
+                  <PlaylistItem item={item} index={virtualItem.index} />
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -73,7 +103,9 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
 const PlaylistHeader = ({ playlistData }: { playlistData: youtube_v3.Schema$Playlist }) => (
   <div className="pb-3">
     <h1 className="mb-2 text-2xl font-bold text-primary">{playlistData.snippet?.title}</h1>
-    <p className="mb-2 text-primaryLight">{playlistData.snippet?.description}</p>
+    <p className="mb-2 text-primaryLight">
+      {playlistData.snippet?.description ? playlistData.snippet?.description : "No description"}
+    </p>
     <div className="flex items-center text-primary">
       <span>{playlistData.contentDetails?.itemCount} tracks</span>
       <span className="px-2 text-xs text-primaryLight">•</span>
@@ -83,9 +115,9 @@ const PlaylistHeader = ({ playlistData }: { playlistData: youtube_v3.Schema$Play
 );
 
 const PlaylistItem = ({ item, index }: { item: youtube_v3.Schema$PlaylistItem; index: number }) => (
-  <div className="flex items-center p-2 rounded-lg hover:bg-primaryDark">
+  <div className="flex items-center p-2 pl-0 rounded-lg hover:bg-primaryDark">
     <div className="flex flex-1 items-center min-w-0">
-      <span className="mr-4 w-6 text-right text-primaryLight text-sm">{index + 1}</span>
+      <span className="w-10 text-center text-primaryLight text-sm">{index + 1}</span>
       <ThumbnailOrPlaceholder url={item.snippet?.thumbnails?.default?.url} />
       <div className="flex flex-col flex-1 min-w-0">
         <div className="truncate text-primary">{item.snippet?.title}</div>
@@ -109,7 +141,7 @@ const ThumbnailOrPlaceholder = ({ url }: { url?: string | null }) =>
   );
 
 const LoadingIndicator = () => (
-  <div className="text-center">
+  <div className="flex flex-col items-center justify-center h-full">
     <span className="icon-[svg-spinners--3-dots-fade] text-primaryLight text-2xl" />
   </div>
 );
