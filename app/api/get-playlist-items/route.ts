@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     console.error("Error fetching playlist items:", error);
 
     if (
-      (error as any)?.code === 401 ||
+      (error && typeof error === "object" && "code" in error && error.code === 401) ||
       (error instanceof Error && (error.message?.includes("invalid_grant") || error.message?.includes("invalid_token")))
     ) {
       return NextResponse.json({ error: "Authentication expired. Please log in again." }, { status: 401 });

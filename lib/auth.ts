@@ -46,7 +46,7 @@ export async function authenticateWithTokens() {
 export async function tryAuthenticateWithTokens() {
   try {
     return await authenticateWithTokens();
-  } catch (error) {
+  } catch {
     return null;
   }
 }

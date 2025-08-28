@@ -1,5 +1,5 @@
 import { Playlist } from "@/components/Playlist";
-import { youtube, oauth2Client } from "@/lib/google";
+import { youtube } from "@/lib/google";
 import { tryAuthenticateWithTokens } from "@/lib/auth";
 import { google } from "googleapis";
 

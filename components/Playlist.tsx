@@ -62,7 +62,8 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
 
   // Infinite scrolling logic
   useEffect(() => {
-    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
+    const virtualItems = virtualizer.getVirtualItems();
+    const [lastItem] = [...virtualItems].reverse();
 
     if (!lastItem) return;
 
@@ -70,7 +71,7 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
     if (lastItem.index >= itemCount - 5 && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [hasNextPage, fetchNextPage, itemCount, isFetchingNextPage, virtualizer.getVirtualItems()]);
+  }, [hasNextPage, fetchNextPage, itemCount, isFetchingNextPage, virtualizer]);
 
   return (
     <div className="flex flex-col p-2 mx-auto max-w-xl h-dvh">
