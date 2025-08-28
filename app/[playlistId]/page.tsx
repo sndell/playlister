@@ -1,20 +1,16 @@
 import { Playlist } from "@/components/Playlist";
-import { oauth2Client, youtube } from "@/lib/google";
-import { cookies } from "next/headers";
+import { youtube, oauth2Client } from "@/lib/google";
+import { tryAuthenticateWithTokens } from "@/lib/auth";
+import { google } from "googleapis";
 
 export default async function Page({ params }: { params: Promise<{ playlistId: string }> }) {
   const getPlaylistDetails = async (playlistId: string) => {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
-    const refreshToken = cookieStore.get("refreshToken")?.value;
+    try {
+      // First try with authentication for private playlists
+      const authResult = await tryAuthenticateWithTokens();
 
-    if (accessToken) {
-      try {
-        oauth2Client.setCredentials({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-
+      if (authResult) {
+        // User is authenticated, use authenticated YouTube client
         const [playlistResponse, playlistItemsResponse] = await Promise.all([
           youtube.playlists.list({
             part: ["snippet", "contentDetails"],
@@ -30,16 +26,43 @@ export default async function Page({ params }: { params: Promise<{ playlistId: s
         const playlistDetails = playlistResponse.data.items?.[0];
         const playlistItems = playlistItemsResponse.data;
 
-        return {
-          details: playlistDetails,
-          items: playlistItems,
-        };
-      } catch (error) {
-        console.error("Error fetching playlist data:", error);
-        return null;
+        if (playlistDetails && playlistItems) {
+          return {
+            details: playlistDetails,
+            items: playlistItems,
+          };
+        }
       }
+
+      // If not authenticated or playlist not found, try with public API key
+      const publicYoutube = google.youtube({
+        version: "v3",
+        auth: process.env.GOOGLE_API_KEY,
+      });
+
+      const [playlistResponse, playlistItemsResponse] = await Promise.all([
+        publicYoutube.playlists.list({
+          part: ["snippet", "contentDetails"],
+          id: [playlistId],
+        }),
+        publicYoutube.playlistItems.list({
+          part: ["snippet"],
+          playlistId,
+          maxResults: 50,
+        }),
+      ]);
+
+      const playlistDetails = playlistResponse.data.items?.[0];
+      const playlistItems = playlistItemsResponse.data;
+
+      return {
+        details: playlistDetails,
+        items: playlistItems,
+      };
+    } catch (error) {
+      console.error("Error fetching playlist data:", error);
+      return null;
     }
-    return null;
   };
 
   const { playlistId } = await params;

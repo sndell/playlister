@@ -24,7 +24,19 @@ export const Playlist = ({ playlistItems, playlistData }: Props) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playlistId: playlistData.id, pageToken: pageParam }),
       });
-      if (!response.ok) throw new Error("Failed to fetch playlist items");
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+
+        if (response.status === 401) {
+          // Authentication error - redirect to login
+          window.location.href = "/";
+          throw new Error(errorData.error || "Authentication required");
+        }
+
+        throw new Error(errorData.error || "Failed to fetch playlist items");
+      }
+
       return response.json() as Promise<youtube_v3.Schema$PlaylistItemListResponse>;
     },
     [playlistData.id]

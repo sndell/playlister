@@ -1,37 +1,31 @@
 import { PlaylistInput } from "@/components/PlaylistInput";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
-import { cookies } from "next/headers";
 import { UserPlaylists } from "@/components/UserPlaylists";
 import { cn } from "@/util/cn";
-import { youtube, oauth2Client } from "@/lib/google";
+import { youtube } from "@/lib/google";
+import { tryAuthenticateWithTokens } from "@/lib/auth";
 import Link from "next/link";
 import { ToggleContsentModalButton } from "@/components/ToggleContsentModalButton";
 
 export default async function Home() {
   const getPlaylists = async () => {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
-    const refreshToken = cookieStore.get("refreshToken")?.value;
-
-    if (accessToken || refreshToken) {
-      try {
-        oauth2Client.setCredentials({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-
-        const response = await youtube.playlists.list({
-          part: ["snippet"],
-          mine: true,
-          maxResults: 50,
-        });
-
-        return response.data.items;
-      } catch (error) {
-        console.error("Error fetching playlists:", error);
+    try {
+      const authResult = await tryAuthenticateWithTokens();
+      if (!authResult) {
+        return null; // Not authenticated, return null gracefully
       }
+
+      const response = await youtube.playlists.list({
+        part: ["snippet"],
+        mine: true,
+        maxResults: 50,
+      });
+
+      return response.data.items;
+    } catch (error) {
+      console.error("Error fetching playlists:", error);
+      return null;
     }
-    return null;
   };
 
   const playlists = await getPlaylists();

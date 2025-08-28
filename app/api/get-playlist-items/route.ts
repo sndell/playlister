@@ -1,33 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { oauth2Client, youtube } from "@/lib/google";
+import { youtube } from "@/lib/google";
+import { tryAuthenticateWithTokens } from "@/lib/auth";
+import { google } from "googleapis";
 
 export async function POST(req: NextRequest) {
   const { playlistId, pageToken } = await req.json();
 
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  const refreshToken = cookieStore.get("refreshToken")?.value;
-
-  if (!accessToken && !refreshToken) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   if (!playlistId) return NextResponse.json({ error: "Playlist ID is required" }, { status: 400 });
 
   try {
-    oauth2Client.setCredentials({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
+    // Try to authenticate first for private playlists
+    const authResult = await tryAuthenticateWithTokens();
 
-    const response = await youtube.playlistItems.list({
-      part: ["snippet"],
-      playlistId,
-      maxResults: 50,
-      pageToken: pageToken || undefined,
-    });
+    if (authResult) {
+      // User is authenticated, use authenticated client
+      const response = await youtube.playlistItems.list({
+        part: ["snippet"],
+        playlistId,
+        maxResults: 50,
+        pageToken: pageToken || undefined,
+      });
 
-    return NextResponse.json(response.data);
+      return NextResponse.json(response.data);
+    } else {
+      // Not authenticated, try with public API key for public playlists
+      const publicYoutube = google.youtube({
+        version: "v3",
+        auth: process.env.GOOGLE_API_KEY,
+      });
+
+      const response = await publicYoutube.playlistItems.list({
+        part: ["snippet"],
+        playlistId,
+        maxResults: 50,
+        pageToken: pageToken || undefined,
+      });
+
+      return NextResponse.json(response.data);
+    }
   } catch (error) {
     console.error("Error fetching playlist items:", error);
+
+    if (
+      (error as any)?.code === 401 ||
+      (error instanceof Error && (error.message?.includes("invalid_grant") || error.message?.includes("invalid_token")))
+    ) {
+      return NextResponse.json({ error: "Authentication expired. Please log in again." }, { status: 401 });
+    }
+
     return NextResponse.json({ error: "Failed to fetch playlist items" }, { status: 500 });
   }
 }

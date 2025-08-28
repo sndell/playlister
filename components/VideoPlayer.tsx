@@ -22,7 +22,7 @@ export const VideoPlayer = ({ id }: { id?: string }) => {
     // Allow volume updates after 0.5 seconds
     setTimeout(() => {
       setCanUpdateVolume(true);
-    }, 500);
+    }, 1000);
   };
 
   useEffect(() => {
