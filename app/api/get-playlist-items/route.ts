@@ -23,7 +23,6 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(response.data);
     } else {
-      // Not authenticated, try with public API key for public playlists
       const publicYoutube = google.youtube({
         version: "v3",
         auth: process.env.GOOGLE_API_KEY,
